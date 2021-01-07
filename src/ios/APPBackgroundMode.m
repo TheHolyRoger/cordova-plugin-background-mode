@@ -51,8 +51,6 @@ NSString* const kAPPBackgroundEventDeactivate = @"deactivate";
 - (void) pluginInitialize
 {
     enabled = NO;
-    [self configureAudioPlayer];
-    [self configureAudioSession];
     [self observeLifeCycle];
 }
 
@@ -140,44 +138,6 @@ NSString* const kAPPBackgroundEventDeactivate = @"deactivate";
 
     [audioPlayer pause];
 }
-
-/**
- * Configure the audio player.
- */
-- (void) configureAudioPlayer
-{
-    NSString* path = [[NSBundle mainBundle]
-                      pathForResource:@"appbeep" ofType:@"wav"];
-
-    NSURL* url = [NSURL fileURLWithPath:path];
-
-
-    audioPlayer = [[AVAudioPlayer alloc]
-                   initWithContentsOfURL:url error:NULL];
-
-    audioPlayer.volume        = 0;
-    audioPlayer.numberOfLoops = -1;
-};
-
-/**
- * Configure the audio session.
- */
-- (void) configureAudioSession
-{
-    AVAudioSession* session = [AVAudioSession
-                               sharedInstance];
-
-    // Don't activate the audio session yet
-    [session setActive:NO error:NULL];
-
-    // Play music even in background and dont stop playing music
-    // even another app starts playing sound
-    [session setCategory:AVAudioSessionCategoryPlayback
-                   error:NULL];
-
-    // Active the audio session
-    [session setActive:YES error:NULL];
-};
 
 #pragma mark -
 #pragma mark Helper
