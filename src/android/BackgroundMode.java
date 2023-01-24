@@ -61,6 +61,9 @@ public class BackgroundMode extends CordovaPlugin {
     // Service that keeps the app awake
     private ForegroundService service;
 
+    private CallbackContext callbackActivate;
+    private CallbackContext callbackDeactivate;
+
     // Used to (un)bind the service to with the activity
     private final ServiceConnection connection = new ServiceConnection()
     {
@@ -123,6 +126,12 @@ public class BackgroundMode extends CordovaPlugin {
             case "disable":
                 disableMode();
                 break;
+            case "setCallbackActivate":
+                callbackActivate = callback;
+                return true;
+            case "setCallbackDeactivate":
+                callbackDeactivate = callback;
+                return true;
             default:
                 validAction = false;
         }
@@ -270,6 +279,9 @@ public class BackgroundMode extends CordovaPlugin {
         try {
             context.bindService(intent, connection, BIND_AUTO_CREATE);
             fireEvent(Event.ACTIVATE, null);
+            try {
+                callbackActivate.success();
+            } catch (Exception e) {}
             context.startService(intent);
         } catch (Exception e) {
             fireEvent(Event.FAILURE, String.format("'%s'", e.getMessage()));
@@ -290,6 +302,9 @@ public class BackgroundMode extends CordovaPlugin {
         if (!isBind) return;
 
         fireEvent(Event.DEACTIVATE, null);
+        try {
+            callbackDeactivate.success();
+        } catch (Exception e) {}
         try {
             context.unbindService(connection);
             context.stopService(intent);
