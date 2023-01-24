@@ -137,6 +137,13 @@ public class BackgroundMode extends CordovaPlugin {
     }
 
     /**
+     * Returns background mode active bind state.
+     */
+    public boolean isBackgroundActive() {
+        return isBind;
+    }
+
+    /**
      * Called when the system is about to start resuming a previous activity.
      *
      * @param multitasking Flag indicating if multitasking is turned on for app.
