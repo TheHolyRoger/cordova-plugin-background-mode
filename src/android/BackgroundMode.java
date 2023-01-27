@@ -63,6 +63,8 @@ public class BackgroundMode extends CordovaPlugin {
 
     private CallbackContext callbackActivate;
     private CallbackContext callbackDeactivate;
+    private CallbackContext callbackAfterResume;
+    private CallbackContext callbackBeforeExit;
 
     // Used to (un)bind the service to with the activity
     private final ServiceConnection connection = new ServiceConnection()
@@ -132,6 +134,12 @@ public class BackgroundMode extends CordovaPlugin {
             case "setCallbackDeactivate":
                 callbackDeactivate = callback;
                 return true;
+            case "setCallbackBeforeExit":
+                callbackBeforeExit = callback;
+                return true;
+            case "setCallbackAfterResume":
+                callbackAfterResume = callback;
+                return true;
             default:
                 validAction = false;
         }
@@ -153,6 +161,13 @@ public class BackgroundMode extends CordovaPlugin {
     }
 
     /**
+     * Returns background mode enabled state.
+     */
+    public boolean isBackgroundModeEnabled() {
+        return !isDisabled;
+    }
+
+    /**
      * Called when the system is about to start resuming a previous activity.
      *
      * @param multitasking Flag indicating if multitasking is turned on for app.
@@ -162,6 +177,9 @@ public class BackgroundMode extends CordovaPlugin {
     {
         try {
             inBackground = true;
+            try {
+                callbackBeforeExit.success();
+            } catch (Exception e) {}
             startService();
         } finally {
             clearKeyguardFlags(cordova.getActivity());
@@ -186,6 +204,9 @@ public class BackgroundMode extends CordovaPlugin {
     {
         inBackground = false;
         stopService();
+        try {
+            callbackAfterResume.success();
+        } catch (Exception e) {}
     }
 
     /**
